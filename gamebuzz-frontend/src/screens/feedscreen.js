@@ -1,45 +1,51 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, StatusBar } from 'react-native';
-
-const newsData = [
-  {
-    id: '1',
-    title: 'Red Bull Home Ground #5: Format, Schedule, Teams and More',
-    category: 'Valorant',
-    description: 'One of the biggest and most popular off-season events...',
-    time: '9h',
-    image: 'https://via.placeholder.com/150', // Replace with actual image URL
-  },
-  {
-    id: '2',
-    title: 'Valorant Patch 9.10 Agent Changes and Their Impact on the Meta',
-    category: 'Valorant',
-    description: 'The Patch 9.10 Agent changes aim to mix up the meta...',
-    time: 'Yesterday',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: '3',
-    title: 'Valorant Introduces New Upcoming Bundle',
-    category: 'Valorant',
-    description: 'Valorant’s new bundle brings exciting skins...',
-    time: '2 days ago',
-    image: 'https://via.placeholder.com/150',
-  },
-];
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
 
 export default function FeedScreen() {
+  const [newsData, setNewsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch news data from the backend API
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('http://192.168.29.197:8000/api/news'); // Replace with your API URL
+        const data = await response.json();
+        setNewsData(data);
+      } catch (error) {
+        console.error('Error fetching news:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
   const renderNewsItem = ({ item }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      {/* Combine the base URL with the relative image path */}
+      <Image 
+        source={{ uri: `http://192.168.29.197:8000${item.image}` }} 
+        style={styles.image} 
+      />
       <View style={styles.textContainer}>
         <Text style={styles.category}>{item.category}</Text>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+        <Text style={styles.time}>{item.created_at}</Text> {/* Display created_at as time */}
       </View>
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#FF4081" />
+        <Text style={styles.loaderText}>Loading news...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -48,7 +54,7 @@ export default function FeedScreen() {
       <FlatList
         data={newsData}
         renderItem={renderNewsItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
       />
     </View>
@@ -103,5 +109,16 @@ const styles = StyleSheet.create({
   time: {
     color: '#888',
     fontSize: 12,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  loaderText: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 16,
   },
 });

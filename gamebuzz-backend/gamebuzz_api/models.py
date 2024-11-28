@@ -1,12 +1,30 @@
 from django.db import models
 
-class News(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+from django.db import models
+from django.utils.timezone import now
+from datetime import timedelta
 
+class News(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    category = models.CharField(max_length=100)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True) 
+    image = models.ImageField(upload_to='news_images/')
+    
     def __str__(self):
         return self.title
+
+    def time_ago(self):
+        # Calculate the time difference based on created_at
+        time_diff = now() - self.created_at
+        if time_diff < timedelta(hours=1):
+            return f'{int(time_diff.total_seconds() // 60)}m'  # Minutes
+        elif time_diff < timedelta(days=1):
+            return f'{int(time_diff.total_seconds() // 3600)}h'  # Hours
+        elif time_diff < timedelta(weeks=1):
+            return f'{int(time_diff.total_seconds() // 86400)}d'  # Days
+        return f'{int(time_diff.total_seconds() // 604800)}w'  # Weeks
 
 
 class Tournament(models.Model):

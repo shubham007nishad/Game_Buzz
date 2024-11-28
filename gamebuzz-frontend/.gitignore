@@ -34,3 +34,12 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Python
+*.pyc
+__pycache__/
+
+# Django Migrations
+**/migrations/
+**/migrations/*.pyc
+**/migrations/__pycache__/
